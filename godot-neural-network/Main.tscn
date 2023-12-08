@@ -1,0 +1,211 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Fonts/FreeSans48.tres" type="DynamicFont" id=1]
+[ext_resource path="res://Main.gd" type="Script" id=2]
+[ext_resource path="res://Fonts/FreeMono64.tres" type="DynamicFont" id=3]
+[ext_resource path="res://Fonts/FreeSans.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://Fonts/FreeSans32.tres" type="DynamicFont" id=5]
+[ext_resource path="res://addons/AIBox/NeuralNetworkUI.gd" type="Script" id=6]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends AIBox
+
+class_name BrainBlueprint
+
+## The number of inputs
+export (int) var number_of_inputs = 1
+## The number of neuron layers, and the number of neurons in each layer
+export (Array, int) var neuron_layers = []
+## The number of outputs
+export (int) var number_of_outputs = 1
+"
+
+[sub_resource type="DynamicFont" id=1]
+size = 24
+use_filter = true
+font_data = ExtResource( 4 )
+
+[node name="Main" type="Node2D"]
+script = ExtResource( 2 )
+time = 60
+
+[node name="BrainBlueprint" type="Node" parent="."]
+script = SubResource( 2 )
+number_of_inputs = 8
+neuron_layers = [ 8, 8, 8 ]
+number_of_outputs = 3
+
+[node name="GameScenes" type="Node" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Menu" type="Control" parent="CanvasLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="EndOfSim" type="Control" parent="CanvasLayer/Menu"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Results" type="VBoxContainer" parent="CanvasLayer/Menu/EndOfSim"]
+anchor_left = 0.2
+anchor_top = 0.2
+anchor_right = 0.8
+anchor_bottom = 0.8
+
+[node name="FirstPlace" type="Label" parent="CanvasLayer/Menu/EndOfSim/Results"]
+margin_right = 1152.0
+margin_bottom = 213.0
+size_flags_vertical = 7
+custom_fonts/font = ExtResource( 3 )
+text = "First place: ..."
+valign = 1
+
+[node name="SecondPlace" type="Label" parent="CanvasLayer/Menu/EndOfSim/Results"]
+margin_top = 217.0
+margin_right = 1152.0
+margin_bottom = 430.0
+size_flags_vertical = 7
+custom_fonts/font = ExtResource( 3 )
+text = "Second place: ..."
+valign = 1
+
+[node name="ThirdPlace" type="Label" parent="CanvasLayer/Menu/EndOfSim/Results"]
+margin_top = 434.0
+margin_right = 1152.0
+margin_bottom = 648.0
+size_flags_vertical = 7
+custom_fonts/font = ExtResource( 3 )
+text = "Third place: ..."
+valign = 1
+
+[node name="NextGeneration" type="Button" parent="CanvasLayer/Menu/EndOfSim"]
+anchor_left = 0.4
+anchor_top = 0.85
+anchor_right = 0.6
+anchor_bottom = 0.95
+margin_left = -0.320068
+margin_top = -0.280029
+margin_right = 0.319946
+custom_fonts/font = ExtResource( 1 )
+text = "Next Generation"
+
+[node name="Save" type="Button" parent="CanvasLayer/Menu/EndOfSim"]
+anchor_left = 0.625
+anchor_top = 0.9
+anchor_right = 0.7
+anchor_bottom = 0.95
+custom_fonts/font = ExtResource( 5 )
+text = "Save"
+
+[node name="Load" type="Button" parent="CanvasLayer/Menu"]
+anchor_left = 0.05
+anchor_top = 0.8
+anchor_right = 0.15
+anchor_bottom = 0.85
+margin_left = -0.320038
+margin_top = -0.280029
+margin_right = 0.320007
+custom_fonts/font = ExtResource( 5 )
+text = "Load"
+
+[node name="NewSimulation" type="Button" parent="CanvasLayer/Menu"]
+anchor_left = 0.05
+anchor_top = 0.9
+anchor_right = 0.2
+anchor_bottom = 0.95
+margin_left = -0.320038
+margin_top = -0.280029
+margin_right = 0.320007
+custom_fonts/font = ExtResource( 5 )
+text = "New Simulation"
+
+[node name="CheckBoxes" type="VBoxContainer" parent="CanvasLayer/Menu"]
+anchor_left = 0.625
+anchor_top = 0.8
+anchor_right = 0.95
+anchor_bottom = 0.875
+
+[node name="AutoNext" type="HBoxContainer" parent="CanvasLayer/Menu/CheckBoxes"]
+margin_right = 624.0
+margin_bottom = 25.0
+
+[node name="CheckBox" type="CheckBox" parent="CanvasLayer/Menu/CheckBoxes/AutoNext"]
+margin_right = 24.0
+margin_bottom = 25.0
+
+[node name="Label" type="Label" parent="CanvasLayer/Menu/CheckBoxes/AutoNext"]
+margin_left = 28.0
+margin_right = 426.0
+margin_bottom = 25.0
+custom_fonts/font = SubResource( 1 )
+text = "Automatically start the next generation"
+align = 1
+valign = 1
+
+[node name="AutoEvolve" type="HBoxContainer" parent="CanvasLayer/Menu/CheckBoxes"]
+margin_top = 29.0
+margin_right = 624.0
+margin_bottom = 54.0
+
+[node name="CheckBox" type="CheckBox" parent="CanvasLayer/Menu/CheckBoxes/AutoEvolve"]
+margin_right = 24.0
+margin_bottom = 25.0
+pressed = true
+
+[node name="Label" type="Label" parent="CanvasLayer/Menu/CheckBoxes/AutoEvolve"]
+margin_left = 28.0
+margin_right = 263.0
+margin_bottom = 25.0
+custom_fonts/font = SubResource( 1 )
+text = "Apply natural selection"
+align = 1
+valign = 1
+
+[node name="SaveName" type="LineEdit" parent="CanvasLayer/Menu"]
+anchor_left = 0.725
+anchor_top = 0.9
+anchor_right = 0.95
+anchor_bottom = 0.95
+custom_fonts/font = ExtResource( 5 )
+placeholder_text = "Name of save file"
+
+[node name="SimulationUI" type="Control" parent="CanvasLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="NeuralNetworkUI" type="Control" parent="CanvasLayer/SimulationUI"]
+anchor_left = 0.7
+anchor_right = 1.0
+anchor_bottom = 0.3
+script = ExtResource( 6 )
+
+[node name="Time" type="Label" parent="CanvasLayer/SimulationUI"]
+margin_right = 40.0
+margin_bottom = 14.0
+custom_fonts/font = ExtResource( 1 )
+text = "Time left: ..."
+
+[node name="GenNumber" type="Label" parent="CanvasLayer/SimulationUI"]
+margin_top = 48.0
+margin_right = 281.0
+margin_bottom = 97.0
+custom_fonts/font = ExtResource( 1 )
+text = "Generation ..."
+
+[node name="Hint" type="Label" parent="CanvasLayer/SimulationUI"]
+margin_top = 288.0
+margin_right = 580.0
+margin_bottom = 321.0
+custom_fonts/font = ExtResource( 5 )
+text = "Press Q to stop automatic next generation"
+valign = 2
+
+[node name="SimulationTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="pressed" from="CanvasLayer/Menu/EndOfSim/NextGeneration" to="." method="_on_NextGeneration_pressed"]
+[connection signal="pressed" from="CanvasLayer/Menu/EndOfSim/Save" to="." method="_on_Save_pressed"]
+[connection signal="pressed" from="CanvasLayer/Menu/Load" to="." method="_on_Load_pressed"]
+[connection signal="pressed" from="CanvasLayer/Menu/NewSimulation" to="." method="_on_NewSimulation_pressed"]
+[connection signal="timeout" from="SimulationTimer" to="." method="_on_SimulationTimer_timeout"]
