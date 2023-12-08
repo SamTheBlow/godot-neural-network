@@ -1,31 +1,34 @@
 extends Node
 
-export (PackedScene) var test_scene
 
-func _ready():
-	var start_time
-	var dummy_variable = "hello"
-	var brain
-	var objects = []
-	var count = 10000
+@export var test_scene: PackedScene
+
+
+func _ready() -> void:
+	var start_time: int
+	var dummy_variable: String = "hello"
+	var brain: TestNode
+	var count: int = 10000
 	
-	print(String(count) + " nodes:")
-	start_time = OS.get_ticks_msec()
+	print(str(count) + " nodes:")
+	start_time = Time.get_ticks_msec()
 	for i in count:
-		brain = test_scene.instance()
+		brain = test_scene.instantiate() as TestNode
 		brain.dummy_variable = dummy_variable
 		add_child(brain)
-	var children = get_children()
+	var children: Array[Node] = get_children()
 	for child in children:
 		child.queue_free()
-	print(String(OS.get_ticks_msec() - start_time) + " ms")
+	print(str(Time.get_ticks_msec() - start_time) + " ms")
 	
-	print(String(count) + " arrays:")
-	start_time = OS.get_ticks_msec()
+	var objects: Array = []
+	var dummy_array: Array = []
+	print(str(count) + " arrays:")
+	start_time = Time.get_ticks_msec()
 	for i in count:
-		brain = [dummy_variable]
-		objects.append(brain)
+		dummy_array = [dummy_variable]
+		objects.append(dummy_array)
 	for i in count:
-		objects.remove(0)
-	print(String(OS.get_ticks_msec() - start_time) + " ms")
+		objects.remove_at(0)
+	print(str(Time.get_ticks_msec() - start_time) + " ms")
 	print("Done")

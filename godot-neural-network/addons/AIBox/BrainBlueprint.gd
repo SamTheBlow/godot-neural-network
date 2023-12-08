@@ -1,9 +1,12 @@
+class_name BrainBlueprint
 extends AIBox
-class_name BrainBlueprint, "aibox.svg"
+
 
 ## The number of inputs
-export (int) var number_of_inputs = 1
+@export var number_of_inputs: int = 1
+
 ## The number of neuron layers, and the number of neurons in each layer
-export (Array, int) var neuron_layers = []
+@export var neuron_layers: Array[int] = []
+
 ## The number of outputs
-export (int) var number_of_outputs = 1
+@export var number_of_outputs: int = 1

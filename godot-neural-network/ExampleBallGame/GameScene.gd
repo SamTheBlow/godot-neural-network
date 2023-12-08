@@ -1,79 +1,93 @@
-# Call load_ai() to load an AI from existing data
+class_name Game
 extends Node2D
+## Call load_ai() to load an AI from existing data
 
-var ball_scene = preload("res://ExampleBallGame/Ball.tscn")
-var ball
+
+var ball_scene := preload("res://ExampleBallGame/Ball.tscn") as PackedScene
+var ball: Ball
 
 # Variables to be set up by whatever is building this scene
-var ai
-var player_controlled = true
-var show_interface = false
-var ghost_transparency = 0.1
+var ai: NeuralNetworkAI
+var player_controlled: bool
+var show_interface: bool
+var ghost_transparency: float = 0.1
+#
 
-# Number of balls successfully launched into the net
-var goals = 0
+## Number of balls successfully launched into the net
+var goals: int = 0
 
-func _ready():
-	$Player.set_ghost_transparency(ghost_transparency)
-	$InterfaceCanvas.visible = show_interface
+@onready var player := $Player as Player
+@onready var net := $Net/Net as Area2D
+@onready var interface_canvas := $InterfaceCanvas as CanvasLayer
+@onready var score := $InterfaceCanvas/Score as Label
+@onready var brain_inputs := $InterfaceCanvas/BrainInputs as Label
+@onready var brain_outputs := $InterfaceCanvas/BrainOutputs as Label
+
+
+func _ready() -> void:
+	player.set_ghost_transparency(ghost_transparency)
+	interface_canvas.visible = show_interface
 	spawn_ball()
 
-func _process(_delta):
+
+func _process(_delta: float) -> void:
 	# Punish the AI if the ball goes too fast
 	# We want the AI to make clean-looking shots!
 	# But more importantly, we want them to not abuse glitches :)
-	if ball.linear_velocity.length() >= 1800:
-		ai.score -= floor(ball.linear_velocity.length() * 0.01)
+	if ball.linear_velocity.length() >= 1800.0:
+		ai.score -= floori(ball.linear_velocity.length() * 0.01)
 	
 	# Reward the AI if the ball is close to the net
 	if ball.is_inside_tree():
-		var x = ball.global_position.x - global_position.x
-		var y = ball.global_position.y
+		var x: float = ball.global_position.x - global_position.x
+		var y: float = ball.global_position.y
 		# The ball is on the right side of the screen? POINTS FOR YOU!
-		if y > 0 && y < 1080 * 0.7 && x > 1920 * 0.5:
+		if y > 0 and y < 1080 * 0.7 and x > 1920 * 0.5:
 			ai.score += 10
 		# The ball got super close to the net? BONUS POINTS!!!
-		if y > 1080 * 0.1 && y < 1080 * 0.5 && x > 1920 * 0.7:
+		if y > 1080 * 0.1 and y < 1080 * 0.5 and x > 1920 * 0.7:
 			ai.score += 100
 
-func _physics_process(_delta):
-	var inputs = get_ai_inputs()
-	var actions
+
+func _physics_process(_delta: float) -> void:
+	var inputs: Array[float] = get_ai_inputs()
+	var actions: Array[float]
 	
 	if player_controlled:
-		actions = $Player.get_actions()
+		actions = player.get_actions()
 	else:
 		actions = ai.inputs_to_outputs(inputs)
 	
 	# The AI's score (not the number of goals!)
-	$InterfaceCanvas/Score.text = "Score: " + String(ai.score)
-	$InterfaceCanvas/BrainInputs.text = "Input: " + String(inputs)
-	$InterfaceCanvas/BrainOutputs.text = "Output: " + String(actions)
-	$Player.do_actions(actions)
+	score.text = "Score: " + str(ai.score)
+	brain_inputs.text = "Input: " + str(inputs)
+	brain_outputs.text = "Output: " + str(actions)
+	
+	player.do_actions(actions)
 
-### Functions for converting stuff into AI inputs
-func get_ai_inputs() -> PoolRealArray:
-	var ball_pos_x:float = 0
-	var ball_pos_y:float = 0
-	var ball_vel_x:float = 0.5
-	var ball_vel_y:float = 0.5
+
+func get_ai_inputs() -> Array[float]:
+	var ball_pos_x: float = 0.0
+	var ball_pos_y: float = 0.0
+	var ball_vel_x: float = 0.5
+	var ball_vel_y: float = 0.5
 	if ball.is_inside_tree():
 		ball_pos_x = normalize_float_linear(ball.global_position.x - global_position.x, 0, 1920)
 		ball_pos_y = normalize_float_linear(ball.global_position.y, 0, 1080)
 		ball_vel_x = normalize_float_inverse(ball.linear_velocity.x)
 		ball_vel_y = normalize_float_inverse(ball.linear_velocity.y)
 	
-	var player_pos_x:float = 0
-	var player_pos_y:float = 0
-	var player_vel_x:float = 0.5
-	var player_vel_y:float = 0.5
+	var player_pos_x: float = 0.0
+	var player_pos_y: float = 0.0
+	var player_vel_x: float = 0.5
+	var player_vel_y: float = 0.5
 	if true:
-		player_pos_x = normalize_float_linear($Player.global_position.x - global_position.x, 0, 1920)
-		player_pos_y = normalize_float_linear($Player.global_position.y, 0, 1080)
-		player_vel_x = normalize_float_inverse($Player.velocity.x)
-		player_vel_y = normalize_float_inverse($Player.velocity.y)
+		player_pos_x = normalize_float_linear(player.global_position.x - global_position.x, 0, 1920)
+		player_pos_y = normalize_float_linear(player.global_position.y, 0, 1080)
+		player_vel_x = normalize_float_inverse(player.velocity.x)
+		player_vel_y = normalize_float_inverse(player.velocity.y)
 	
-	var inputs = []
+	var inputs: Array[float] = []
 	inputs.append(player_pos_x)
 	inputs.append(player_pos_y)
 	inputs.append(ball_pos_x)
@@ -84,45 +98,43 @@ func get_ai_inputs() -> PoolRealArray:
 	inputs.append(ball_vel_y)
 	return inputs
 
-func normalize_float_linear(value, minimum, maximum) -> float:
-	if value <= minimum:
-		value = 0
-	elif value > maximum:
-		value = 1
-	else:
-		value = (value - minimum) / (maximum - minimum)
-	return value
 
-func normalize_float_inverse(value) -> float:
-	if value > -1 && value < 1:
+func normalize_float_linear(value: float, minimum: int, maximum: int) -> float:
+	return clampf((value - minimum) / (maximum - minimum), 0.0, 1.0)
+
+
+func normalize_float_inverse(value: float) -> float:
+	if value > -1.0 and value < 1.0:
 		value = 0.5
-	elif value >= 1:
-		value = 1 - (1 / value) * 0.5
-	elif value <= -1:
-		value = -(1 / value) * 0.5
+	elif value >= 1.0:
+		value = 1.0 - (1.0 / value) * 0.5
+	elif value <= -1.0:
+		value = -(1.0 / value) * 0.5
 	return value
-###
 
-func _on_Net_body_entered(body):
-	if body.global_position.y < $Net/Net.global_position.y:
+
+func _on_net_body_entered(body: Node2D) -> void:
+	if body.global_position.y < net.global_position.y:
 		goals += 1
 		# Give the AI a big juicy reward
 		ai.score += 100000
 		ball.queue_free()
 		spawn_ball()
 
-func _on_Ball_body_entered(body):
+
+func _on_ball_body_entered(body: Node2D) -> void:
 	# Reward the AI slightly for hitting the ball
-	if body == $Player:
+	if body == player:
 		ai.score += 100
 
-func spawn_ball():
-	ball = ball_scene.instance()
+
+func spawn_ball() -> void:
+	ball = ball_scene.instantiate() as Ball
 	ball.position.x = randf() * 800 + 100
 	ball.position.y = randf() * 500 + 200
 	ball.rotation = randf() * PI * 2
-	ball.cursor_canvas = $CursorCanvas
-	ball.top_of_screen = $Boundaries/Top
+	ball.cursor_canvas = $CursorCanvas as CanvasLayer
+	ball.top_of_screen = $Boundaries/Top as Area2D
 	ball.ghost_transparency = ghost_transparency
-	ball.connect("body_entered", self, "_on_Ball_body_entered")
+	ball.body_entered.connect(_on_ball_body_entered)
 	$Balls.call_deferred("add_child", ball)

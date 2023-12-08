@@ -1,20 +1,26 @@
-extends KinematicBody2D
+class_name Player
+extends CharacterBody2D
 
-var velocity = Vector2.ZERO
-var gravity = 10
 
-func _process(_delta):
-	$Ghost.global_position = position
+var gravity: float = 10.0
 
-func set_ghost_transparency(transparency):
-	var brightness = 0.75
-	$Ghost.modulate.r = brightness
-	$Ghost.modulate.g = brightness
-	$Ghost.modulate.b = brightness
-	$Ghost.modulate.a = transparency
+@onready var ghost := $Ghost as Sprite2D
 
-func get_actions() -> PoolRealArray:
-	var output = [0.0, 0.0, 0.0]
+
+func _process(_delta: float) -> void:
+	ghost.global_position = position
+
+
+func set_ghost_transparency(transparency: float) -> void:
+	var brightness: float = 0.75
+	ghost.modulate.r = brightness
+	ghost.modulate.g = brightness
+	ghost.modulate.b = brightness
+	ghost.modulate.a = transparency
+
+
+func get_actions() -> Array[float]:
+	var output: Array[float] = [0.0, 0.0, 0.0]
 	
 	if Input.is_action_pressed("move_left"):
 		output[0] = 1.0
@@ -25,20 +31,19 @@ func get_actions() -> PoolRealArray:
 	
 	return output
 
+
 # To be called in a _physics_process()
-func do_actions(actions: PoolRealArray):
-	var direction = Vector2.ZERO
+func do_actions(actions: Array[float]) -> void:
+	var direction := Vector2.ZERO
 	
 	if actions[0] >= 0.5:
-		direction.x -= 1
+		direction.x -= 1.0
 	if actions[1] >= 0.5:
-		direction.x += 1
+		direction.x += 1.0
 	if actions[2] >= 0.5:
 		if is_on_floor():
-			direction.y = -20
+			direction.y = -20.0
 	
-	velocity += direction * 20
+	velocity += direction * 20.0
 	velocity.y += gravity
-	
-# warning-ignore:return_value_discarded
-	velocity = move_and_slide(velocity, Vector2.UP)
+	move_and_slide()

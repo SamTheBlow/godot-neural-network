@@ -1,4 +1,4 @@
-# Abstract parent class
+@icon("aibox.svg")
+class_name AIBox
 extends Node
-
-class_name AIBox, "aibox.svg"
+## Abstract parent class
